@@ -1,37 +1,31 @@
 # ================================================
-# Файл подсветки синтаксиса для библиотеки Checksum
-# Автор: WASH-PRO
-# Email: p.masyukov@gmail.com
-# Библиотека для вычисления 8-битной контрольной суммы
+# Syntax highlighting file for the ArduinoCCNET library
+# Author: Masyukov Pavel
+# Library for working with bill acceptors using the CCNET protocol.
 # ================================================
 
-# Классы (подсвечиваются оранжевым/синим в Arduino IDE)
-Checksum	KEYWORD1
+# Classes (highlighted orange/blue in Arduino IDE)
+CCNET	KEYWORD1
 
-# Публичные методы (подсвечиваются коричневым)
-start		KEYWORD2
-add			KEYWORD2
-get			KEYWORD2
-calculate	KEYWORD2
-verify		KEYWORD2
+# Public methods (highlighted brown)
+init	KEYWORD2
+reset	KEYWORD2
+start	KEYWORD2
+poll	KEYWORD2
 
 # ================================================
-# КОММЕНТАРИИ ПО ИСПОЛЬЗОВАНИЮ:
+# USAGE COMMENTS:
 # 
-# 1. KEYWORD1 - для имен классов (оранжевый/синий цвет)
-# 2. KEYWORD2 - для публичных методов (коричневый цвет)
+# 1. KEYWORD1 - for class names (orange/blue color)
+# 2. KEYWORD2 - for public methods (brown color)
+#
+# FORMAT:
+# <keyword> <TAB> <key_type>
 # 
-# ФОРМАТ:
-# <имя_ключа> <TAB> <тип_ключа>
+# Example usage:
 # 
-# Пример использования:
-# 
-# utils::Checksum checksum;     // KEYWORD1
-# checksum.start();             // KEYWORD2
-# checksum.add(data, len);      // KEYWORD2
-# uint8_t sum = checksum.get(); // KEYWORD2
-# 
-# // Статические методы:
-# uint8_t sum = Checksum::calculate(data, len); // KEYWORD1, KEYWORD2
-# bool ok = Checksum::verify(data, len, expected); // KEYWORD1, KEYWORD2
+# utils::CCNET cashAcceptor; // KEYWORD1
+# cashAcceptor.init();       // KEYWORD2
+# cashAcceptor.start();      // KEYWORD2
+# cashAcceptor.poll();       // KEYWORD2
 # ================================================

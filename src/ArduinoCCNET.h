@@ -1,62 +1,77 @@
 /**
- * @file Checksum.h
- * @brief Заголовочный файл класса для вычисления 8-битной контрольной суммы
- * @author WASH-PRO
- * @email p.masyukov@gmail.com
+ * @file ArduinoCCNET.h
+ * @author Masyukov Pavel
+ * @brief Header file for the CCNET protocol implementation for Arduino.
+ * @version 1.0.0
  * 
- * Класс предоставляет функционал для инкрементального вычисления 
- * контрольной суммы как простой суммы байтов (с накоплением в uint8_t).
- * 
- * @note Использует начальное значение 0xFF для контрольной суммы
- * @warning Из-за использования 8-битного переполнения контрольная сумма 
- *          не является криптографически стойкой и предназначена только 
- *          для проверки целостности данных
+ * This class provides an interface to communicate with a CCNET-based
+ * cash acceptor device using SoftwareSerial.
  */
-
-/*
-  Copyright (c) 2013 Arduino LLC. All right reserved.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-*/
 
 #pragma once
 
 
 #include "Arduino.h"
 #include <SoftwareSerial.h>
-#include <avr/pgmspace.h>
-
 
 namespace utils {
 
 class CCNET
 {
-    public:
-        CCNET::CCNET(int CashCode_BaundRate);
+public:
+    /**
+     * @brief Construct a new CCNET object.
+     * @param rxPin The Arduino pin connected to the cash acceptor's TX line.
+     * @param txPin The Arduino pin connected to the cash acceptor's RX line.
+     * @param baudRate The communication speed (baud rate). Default is 9600.
+     */
+    CCNET(uint8_t rxPin, uint8_t txPin, long baudRate = 9600);
 
-    public:
-        int CashCode_BaundRate;
+    /**
+     * @brief Destroy the CCNET object and free allocated resources.
+     */
+    ~CCNET();
 
-        bool init(void);
-        bool reset(void);
-        bool start(void);
-        unsigned int poll(void);
-        unsigned int coupure(String str); 
-    private:
-        void send(byte *pData, int size);
-        bool ready(void);
+    /**
+     * @brief Initializes the cash acceptor by setting up the serial connection and resetting the device.
+     * @return true if initialization is successful, false otherwise.
+     */
+    bool init(void);
+
+    /**
+     * @brief Sends a RESET command to the cash acceptor.
+     * @return true if the device acknowledges the reset, false otherwise.
+     */
+    bool reset(void);
+
+    /**
+     * @brief Enables bill acceptance on the device.
+     * @return true if the device acknowledges the command, false otherwise.
+     */
+    bool start(void);
+
+    /**
+     * @brief Polls the cash acceptor for events, such as an inserted bill.
+     * @return The bill type number (e.g., 3, 4, 5) if a bill is accepted, or 0 for no event.
+     */
+    unsigned int poll(void);
+
+private:
+    // Private helper methods for internal library operation.
+    bool ready(void);
+    void send(byte *pData, int size);
+    int receive(byte* buffer, int bufferSize, unsigned long timeout = 100);
+    uint8_t getBillType(const byte* buffer, int len);
+    bool compareResponses(const byte* buffer, int len, const byte* expected, int expectedLen);
+    bool isResponseValid(const byte* buffer, int len);
+    uint16_t calculateCRC(const byte* data, int len);
+
+    // Member variables
+    SoftwareSerial* _serial; // Pointer to the SoftwareSerial object for communication.
+    long _baudRate;          // Stores the baud rate for the serial connection.
+
+    // Maximum number of times to retry a command if it fails.
+    static const unsigned int MAX_RETRY = 3;
 };
 
 }

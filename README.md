@@ -1,73 +1,81 @@
-# Checksum Library for Arduino
+# ArduinoCCNET Library
 
-A lightweight 8-bit checksum library for Arduino, ESP8266, ESP32 and other AVR/ARM platforms.
-Provides efficient data integrity verification through simple byte summation.
+A simple Arduino library for communicating with cash acceptors using the CCNET protocol. This library provides a straightforward interface to initialize, enable, and poll for accepted bills from CCNET-compatible devices.
 
 ## Features
 
-* 8-bit checksum calculation with overflow
-* Incremental calculation mode
-* Batch calculation mode
-* Initial value: 0xFF (configurable in code)
-* Support for both single bytes and byte arrays
-* Static methods for one-time calculations
-* Memory efficient (minimal footprint)
-* No external dependencies
+*   Simple interface for core CCNET commands (`RESET`, `POLL`, `ENABLE BILLS`).
+*   Uses `SoftwareSerial` to communicate, leaving the hardware serial port free for debugging.
+*   Handles response validation with built-in 16-bit CRC checks.
+*   Provides a non-blocking `poll()` method for easy integration into the main loop.
+*   Lightweight and has no external dependencies besides the Arduino core libraries.
 
 ## Installation
 
 ### Using Arduino IDE
 
-1. Download the library as ZIP
-2. In Arduino IDE: Sketch → Include Library → Add .ZIP Library...
-3. Select the downloaded ZIP file
+1.  Download the latest release from the Releases page as a `.zip` file.
+2.  In the Arduino IDE, go to `Sketch` → `Include Library` → `Add .ZIP Library...`
+3.  Select the downloaded `.zip` file.
 
 ### Using PlatformIO
 
 Add to your `platformio.ini`:
 
+```ini
 [env:your_board]
-platform = espressif32  ; or your platform
+platform = atmelavr ; or your platform
 framework = arduino
-lib_deps = 
-    https://github.com/Developer-RU/ArduinoCRC.git
+lib_deps =
+    https://github.com/Developer-RU/ArduinoCCNET.git
+```
 
 ## Usage
 
+Here is a basic example of how to use the library. For a complete sketch, see the `Simple.ino` example included with the library.
+
 ```cpp
-#include <Checksum.h>
+#include <Arduino.h>
+#include <ArduinoCCNET.h>
+
+// Define the RX and TX pins for the cash acceptor.
+#define CCNET_RX_PIN 2
+#define CCNET_TX_PIN 3
+
+// Create an instance of the CCNET class.
+utils::CCNET cashAcceptor(CCNET_RX_PIN, CCNET_TX_PIN, 9600);
+
+unsigned long lastPollTime = 0;
+const unsigned long POLL_INTERVAL_MS = 200;
 
 void setup() {
     Serial.begin(115200);
-    
-    // Example 1: Incremental calculation
-    utils::Checksum checksum;
-    checksum.start();
-    checksum.add(0x01);
-    checksum.add(0x02);
-    checksum.add(0x03);
-    uint8_t result = checksum.get(); // 0xFF + 0x01 + 0x02 + 0x03 = 0x05
-    
-    Serial.print("Incremental checksum: 0x");
-    Serial.println(result, HEX);
-    
-    // Example 2: Batch calculation
-    uint8_t data[] = {0x01, 0x02, 0x03, 0x04, 0x05};
-    uint8_t batchResult = utils::Checksum::calculate(data, sizeof(data));
-    
-    Serial.print("Batch checksum: 0x");
-    Serial.println(batchResult, HEX);
-    
-    // Example 3: Verification
-    uint8_t expected = 0x09;
-    bool isValid = utils::Checksum::verify(data, sizeof(data), expected);
-    
-    Serial.print("Verification: ");
-    Serial.println(isValid ? "PASS" : "FAIL");
+    Serial.println("CCNET Example Sketch");
+
+    if (cashAcceptor.init()) {
+        Serial.println("Cash acceptor initialized successfully.");
+        if (cashAcceptor.start()) {
+            Serial.println("Cash acceptor is now accepting bills.");
+        } else {
+            Serial.println("Failed to start cash acceptor!");
+        }
+    } else {
+        Serial.println("Failed to initialize cash acceptor! Check wiring.");
+    }
 }
 
 void loop() {
-    // Empty
+    // Poll the device periodically.
+    if (millis() - lastPollTime > POLL_INTERVAL_MS) {
+        lastPollTime = millis();
+
+        unsigned int billType = cashAcceptor.poll();
+
+        if (billType > 0) {
+            Serial.print("Accepted a bill of type: ");
+            Serial.println(billType);
+        }
+    }
 }
 ```
 
