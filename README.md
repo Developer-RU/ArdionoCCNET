@@ -1,5 +1,8 @@
 # ArduinoCCNET Library
 
+[![Release](https://img.shields.io/github/v/release/Developer-RU/ArduinoCCNET)](https://github.com/Developer-RU/ArduinoCCNET/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
+
 A simple Arduino library for communicating with cash acceptors using the CCNET protocol. This library provides a straightforward interface to initialize, enable, and poll for accepted bills from CCNET-compatible devices.
 
 ## Features
@@ -20,7 +23,7 @@ A simple Arduino library for communicating with cash acceptors using the CCNET p
 
 ### Using PlatformIO
 
-Add to your `platformio.ini`:
+Add the following line to your `platformio.ini` file under `lib_deps`:
 
 ```ini
 [env:your_board]
@@ -81,64 +84,41 @@ void loop() {
 
 ## API Reference 
 
-### Class: utils::Checksum 
+### Class: `utils::CCNET`
 
-void start() - Reset checksum to initial value (0xFF)
+`CCNET(uint8_t rxPin, uint8_t txPin, long baudRate = 9600)` - Constructor.
 
-void add(uint8_t byte) - Add single byte to checksum
+`bool init()` - Initializes the serial connection and resets the device. Returns `true` on success.
 
-void add(const uint8_t* data, uint16_t dataLen) - Add byte array to checksum
+`bool reset()` - Sends a `RESET` command to the device. Returns `true` if the device acknowledges.
 
-uint8_t get() const - Get current checksum value
+`bool start()` - Sends a command to enable bill acceptance. Returns `true` on success.
 
-### Static Methods
-
-static uint8_t calculate(const uint8_t* data, uint16_t dataLen) - Calculate checksum for byte array
-
-static bool verify(const uint8_t* data, uint16_t dataLen, uint8_t expected) - Verify checksum
-
-## Limitations
-
-8-bit checksum provides basic error detection only
-
-Not cryptographically secure
-
-Susceptible to certain error patterns
-
-Maximum overflow: 255 bytes without loss of precision
+`unsigned int poll()` - Polls the device for events. Returns the bill type number if a bill is accepted, otherwise returns `0`.
 
 ## Examples
 
-The library includes the following examples (File → Examples → ArduinoCRC):
-
-BasicUsage - Simple checksum calculation and verification
-
-Incremental - Demonstrates incremental checksum building
-
-DataVerification - Complete data integrity check example
-
-SerialMonitor - Interactive checksum calculator via Serial
+The library includes a `Simple.ino` example sketch that can be accessed from the Arduino IDE via `File` → `Examples` → `ArduinoCCNET`.
 
 ## Platform Compatibility
 
-✅ Arduino Uno/Nano/Mega (AVR)
-✅ ESP8266
-✅ ESP32
-✅ Arduino Due (SAM)
-✅ Teensy 3.x/4.x
-✅ Raspberry Pi Pico (RP2040)
+This library is compatible with most Arduino boards that support `SoftwareSerial`, including:
+*   Arduino Uno/Nano/Mega (AVR)
+*   ESP8266 / ESP32 (though hardware serial is recommended on these platforms)
 
 ## Library Structure
 
-ArduinoCRC/
-├── examples/           # Example sketches
+```
+ArduinoCCNET/
+├── examples/
 ├── src/
-│   ├── Checksum.cpp   # Implementation
-│   └── Checksum.h     # Header file
-├── library.properties # Library metadata
-├── keywords.txt       # Arduino IDE syntax highlighting
-├── LICENSE           # MIT License
-└── README.adoc       # This file
+│   ├── ArduinoCCNET.cpp   # Implementation
+│   └── ArduinoCCNET.h     # Header file
+├── library.properties
+├── keywords.txt
+├── LICENSE
+└── README.md
+```
 
 ## Contributing
 
@@ -152,48 +132,17 @@ Make your changes
 
 Submit a pull request
 
-Report issues at: https://github.com/Developer-RU/ArduinoCRC/issues
+Report issues at: https://github.com/Developer-RU/ArduinoCCNET/issues
 
-## Changelog ==
+## Changelog
 
-### v2.0.0 (2026-01-03)
+### v1.0.0
 
-Initial release
-
-8-bit checksum implementation
-
-Incremental and batch modes
-
-MIT license
+*   Initial release.
+*   Implementation of core CCNET commands: `RESET`, `POLL`, `ENABLE BILLS`.
+*   Response validation with 16-bit CRC.
+*   Added `Simple.ino` example.
 
 ## License
 
-MIT License
-
-Copyright (c) 2022-2026 WASH-PRO p.masyukov@gmail.com
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-## Links
-
-Repository: https://github.com/Developer-RU/ArduinoCRC
-
-Issues: https://github.com/Developer-RU/ArduinoCRC/issues
-
-Releases: https://github.com/Developer-RU/ArduinoCRC/releases
+This project is licensed under the MIT License - see the LICENSE.md file for details.
