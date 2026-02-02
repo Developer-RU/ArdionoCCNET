@@ -2,7 +2,6 @@
 
 <!-- [![Release](https://img.shields.io/github/v/release/Developer-RU/ArduinoCCNET)](https://github.com/Developer-RU/ArduinoCCNET/releases) -->
 [![Version: 1.0.0](images/version.svg)](https://github.com/Developer-RU/ArduinoCCNET/releases)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
 A simple Arduino library for communicating with cash acceptors using the CCNET protocol. This library provides a straightforward interface to initialize, enable, and poll for accepted bills from CCNET-compatible devices.
